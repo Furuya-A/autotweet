@@ -1,5 +1,5 @@
 # created by virtualenv automatically
-../Autotweet2/venv/
+venv/
 .env
 .ssh/
 __pycache__/
