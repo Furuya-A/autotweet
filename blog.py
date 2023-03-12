@@ -14,6 +14,7 @@ import random
 def exists_new_post():
     with open('newest.txt', 'r') as f:
         posted_title = f.readlines()[0].rstrip('\n')
+        print(f'posted_title:::{posted_title}')
 
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
@@ -26,12 +27,15 @@ def exists_new_post():
     time.sleep(3)
     newest_title = newest_post.find_element(By.CLASS_NAME, 'bl--card__ttl').text
     newest_date = newest_post.find_element(By.CLASS_NAME, 'bl--card__date').text[:10]
+    print(f'newest_title:::{newest_title}')
 
     if posted_title != newest_title:
         with open('newest.txt', 'w') as f:
             f.write(newest_title + '\n' + newest_post.get_attribute("href") + '\n' + newest_date)
+        print('更新')
         return True
 
+    print('更新しない')
     return False
 
 
@@ -53,6 +57,8 @@ def save_images():
     content = driver.find_element(By.CLASS_NAME, 'bd--edit')
     images = content.find_elements(By.TAG_NAME, 'img')
 
+    print(f'imagesは{len(images)}枚')
+
     path = title + '(' + date + ')'
     os.mkdir(path)
 
@@ -63,3 +69,4 @@ def save_images():
 
         with open(path + '/' + str(i) + '.png', mode="wb") as wf:
             wf.write(img_data)
+        print(f'{i+1}枚目保存')

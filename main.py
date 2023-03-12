@@ -89,12 +89,14 @@ def tweet():
 
 
 if __name__ == "__main__":
+    print("開始")
     load_dotenv()
     TWITTER_BASE = os.getenv('TWITTER_BASE')
     LOGIN_ID = os.getenv('LOGIN_ID')
     PASSWORD = os.getenv('PASSWORD')
+    print(f"LOGIN_ID:::{LOGIN_ID}")
 
-    options = webdriver.ChromeOptions()\
+    options = webdriver.ChromeOptions()
 
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
@@ -102,14 +104,19 @@ if __name__ == "__main__":
     driver.set_window_size('1200', '1000')
 
     if blog.exists_new_post():
+        print(f"new_postあり")
         with open("newest.txt", mode='r') as f:
             txt = f.readlines()
             title = txt[0].rstrip('\n')
 
         blog.save_images()
+        print(f"save_images終了")
 
         login(TWITTER_BASE, LOGIN_ID, PASSWORD)
+        print(f"ログイン終了")
         tweet()
+        print(f"tweet終了")
     else:
+        print(f"new_postなし")
         with open("log.txt", mode='a') as f:
             f.write("\n更新なし (" + str(datetime.datetime.now()) + ")")
