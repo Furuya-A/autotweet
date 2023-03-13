@@ -57,44 +57,37 @@ def tweet():
         if i % 4 == 0:
             if i == 0:
                 text_area = driver.find_element(By.XPATH, r'//div[@data-testid="tweetTextarea_0"]')
-                text_area.send_keys(headline + '\n' + url + '\n1/' + str(len(files) // 4 + 1)
-                                    + str(random.randint(1, 1000)))
+                text_area.send_keys(headline + '\n' + url + '\n1/' + str(len(files) // 4 + 1))
             else:
                 elem_add_btn = driver.find_element(By.XPATH, '//div[@data-testid="addButton"]')
                 elem_add_btn.click()
                 time.sleep(3)
                 text_area = 'tweetTextarea_' + str(i // 4)
                 text_area = driver.find_element(By.XPATH, r'//div[@data-testid="' + text_area + r'"]')
-                text_area.send_keys(str(i // 4 + 1) + '/' + str(len(files) // 4 + 1) + str(random.randint(1, 1000)))
+                text_area.send_keys(str(i // 4 + 1) + '/' + str(len(files) // 4 + 1))
 
         elm_upload_img = driver.find_element(By.XPATH, '//input[@data-testid="fileInput"]')
         elm_upload_img.send_keys(image)
         time.sleep(1)
 
     elem_tweet_btn = driver.find_element(By.XPATH, '//div[@data-testid="tweetButton"]')
+    elem_tweet_btn.click()
+
+    time.sleep(10)
 
     with open("log.txt", mode='a', encoding='utf-8') as f:
-        try:
-            elem_tweet_btn.click()
-            time.sleep(10)
-            f.write("\n『" + title + "』" + "投稿完了 (" + str(datetime.datetime.now()) + ")")
-
-        except:
-            f.write("\n『" + title + "』" + "投稿失敗 (" + str(datetime.datetime.now()) + ")")
+        f.write("\n『" + title + "』" + "投稿完了 (" + str(datetime.datetime.now()) + ")")
 
     driver.close()
 
 
 if __name__ == "__main__":
-    print("開始")
     load_dotenv()
     TWITTER_BASE = os.getenv('TWITTER_BASE')
     LOGIN_ID = os.getenv('LOGIN_ID')
     PASSWORD = os.getenv('PASSWORD')
-    print(f"LOGIN_ID:::{LOGIN_ID}")
 
     options = webdriver.ChromeOptions()
-
 
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
@@ -102,19 +95,14 @@ if __name__ == "__main__":
     driver.set_window_size('1200', '1000')
 
     if blog.exists_new_post():
-        print(f"new_postあり")
         with open("newest.txt", mode='r', encoding='utf-8') as f:
             txt = f.readlines()
             title = txt[0].rstrip('\n')
 
         blog.save_images()
-        print(f"save_images終了")
 
         login(TWITTER_BASE, LOGIN_ID, PASSWORD)
-        print(f"ログイン終了")
         tweet()
-        print(f"tweet終了")
     else:
-        print(f"new_postなし")
         with open("log.txt", mode='a', encoding='utf-8') as f:
             f.write("\n更新なし (" + str(datetime.datetime.now()) + ")")
