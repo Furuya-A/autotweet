@@ -42,7 +42,7 @@ def login(TWITTER_BASE, LOGIN_ID, PASSWORD):
 
 
 def tweet():
-    with open('newest.txt', 'r') as f:
+    with open('newest.txt', 'r', encoding='utf-8') as f:
         txt = f.readlines()
         title = txt[0].rstrip('\n')
         url = txt[1].rstrip('\n')
@@ -76,7 +76,7 @@ def tweet():
 
     elem_tweet_btn = driver.find_element(By.XPATH, '//div[@data-testid="tweetButton"]')
 
-    with open("log.txt", mode='a') as f:
+    with open("log.txt", mode='a', encoding='utf-8') as f:
         try:
             elem_tweet_btn.click()
             time.sleep(10)
@@ -105,7 +105,7 @@ if __name__ == "__main__":
 
     if blog.exists_new_post():
         print(f"new_postあり")
-        with open("newest.txt", mode='r') as f:
+        with open("newest.txt", mode='r', encoding='utf-8') as f:
             txt = f.readlines()
             title = txt[0].rstrip('\n')
 
@@ -118,5 +118,5 @@ if __name__ == "__main__":
         print(f"tweet終了")
     else:
         print(f"new_postなし")
-        with open("log.txt", mode='a') as f:
+        with open("log.txt", mode='a', encoding='utf-8') as f:
             f.write("\n更新なし (" + str(datetime.datetime.now()) + ")")
