@@ -15,27 +15,24 @@ import blog
 
 
 def login(TWITTER_BASE, LOGIN_ID, PASSWORD):
-    twitter_base = TWITTER_BASE + "login/"
+    login_url = "https://twitter.com/login/check?lang=en"
     account = LOGIN_ID
     password = PASSWORD
 
-    driver.get(twitter_base)
+    driver.get(login_url)
     time.sleep(2)
 
     element_account = driver.find_element(By.NAME, 'text')
     element_account.send_keys(account)
-
-    element_login_next = driver.find_element(By.XPATH, '//div/span/span[text()="次へ"]')
-
+    element_login_next = driver.find_element(By.XPATH, '//div/span/span[text()="Next"]')
     element_login_next.click()
     time.sleep(5)
 
     element_pass = driver.find_element(By.NAME, "password")
     element_pass.send_keys(password)
+    elm_login_btn = driver.find_element(By.XPATH, '//div[@data-testid="LoginForm_Login_Button"]')
+    elm_login_btn.click()
 
-    element_login = driver.find_element(By.XPATH, '//div/span/span[text()="ログイン"]')
-
-    element_login.click()
     time.sleep(5)
     driver.refresh()
     time.sleep(5)
@@ -98,25 +95,28 @@ if __name__ == "__main__":
 
     options = webdriver.ChromeOptions()
 
+
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     driver = webdriver.Chrome(options=options)
     driver.set_window_size('1200', '1000')
+    login(TWITTER_BASE, LOGIN_ID, PASSWORD)
+    tweet()
 
-    if blog.exists_new_post():
-        print(f"new_postあり")
-        with open("newest.txt", mode='r', encoding='utf-8') as f:
-            txt = f.readlines()
-            title = txt[0].rstrip('\n')
-
-        blog.save_images()
-        print(f"save_images終了")
-
-        login(TWITTER_BASE, LOGIN_ID, PASSWORD)
-        print(f"ログイン終了")
-        tweet()
-        print(f"tweet終了")
-    else:
-        print(f"new_postなし")
-        with open("log.txt", mode='a', encoding='utf-8') as f:
-            f.write("\n更新なし (" + str(datetime.datetime.now()) + ")")
+    # if blog.exists_new_post():
+    #     print(f"new_postあり")
+    #     with open("newest.txt", mode='r', encoding='utf-8') as f:
+    #         txt = f.readlines()
+    #         title = txt[0].rstrip('\n')
+    #
+    #     blog.save_images()
+    #     print(f"save_images終了")
+    #
+    #     login(TWITTER_BASE, LOGIN_ID, PASSWORD)
+    #     print(f"ログイン終了")
+    #     tweet()
+    #     print(f"tweet終了")
+    # else:
+    #     print(f"new_postなし")
+    #     with open("log.txt", mode='a', encoding='utf-8') as f:
+    #         f.write("\n更新なし (" + str(datetime.datetime.now()) + ")")
