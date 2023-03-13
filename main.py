@@ -100,23 +100,21 @@ if __name__ == "__main__":
     options.add_argument('--no-sandbox')
     driver = webdriver.Chrome(options=options)
     driver.set_window_size('1200', '1000')
-    login(TWITTER_BASE, LOGIN_ID, PASSWORD)
-    tweet()
 
-    # if blog.exists_new_post():
-    #     print(f"new_postあり")
-    #     with open("newest.txt", mode='r', encoding='utf-8') as f:
-    #         txt = f.readlines()
-    #         title = txt[0].rstrip('\n')
-    #
-    #     blog.save_images()
-    #     print(f"save_images終了")
-    #
-    #     login(TWITTER_BASE, LOGIN_ID, PASSWORD)
-    #     print(f"ログイン終了")
-    #     tweet()
-    #     print(f"tweet終了")
-    # else:
-    #     print(f"new_postなし")
-    #     with open("log.txt", mode='a', encoding='utf-8') as f:
-    #         f.write("\n更新なし (" + str(datetime.datetime.now()) + ")")
+    if blog.exists_new_post():
+        print(f"new_postあり")
+        with open("newest.txt", mode='r', encoding='utf-8') as f:
+            txt = f.readlines()
+            title = txt[0].rstrip('\n')
+
+        blog.save_images()
+        print(f"save_images終了")
+
+        login(TWITTER_BASE, LOGIN_ID, PASSWORD)
+        print(f"ログイン終了")
+        tweet()
+        print(f"tweet終了")
+    else:
+        print(f"new_postなし")
+        with open("log.txt", mode='a', encoding='utf-8') as f:
+            f.write("\n更新なし (" + str(datetime.datetime.now()) + ")")
