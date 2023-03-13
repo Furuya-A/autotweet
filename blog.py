@@ -11,30 +11,29 @@ import os
 import random
 
 
-def exists_new_post():
-    with open('newest.txt', 'r', encoding='utf-8') as f:
-        posted_title = f.readlines()[0].rstrip('\n')
-
+def reload_newest_post(member):
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     driver = webdriver.Chrome(options=options)
     driver.set_window_size('1200', '1000')
-    driver.get('https://www.nogizaka46.com/s/n46/diary/MEMBER/list?ima=1109&ct=55397')
+    driver.get(member['blog_url'])
 
     newest_post = driver.find_element(By.CLASS_NAME, 'bl--card')
     time.sleep(3)
-    newest_title = newest_post.find_element(By.CLASS_NAME, 'bl--card__ttl').text
-    newest_date = newest_post.find_element(By.CLASS_NAME, 'bl--card__date').text[:10]
 
-    if posted_title != newest_title:
-        with open('newest.txt', 'w', encoding='utf-8') as f:
-            f.write(newest_title + '\n' + newest_post.get_attribute("href") + '\n' + newest_date)
-        return True
-    return False
+    if member['newest_title'] != newest_post.find_element(By.CLASS_NAME, 'bl--card__ttl').text:
+        member['newest_title'] = newest_post.find_element(By.CLASS_NAME, 'bl--card__ttl').text
+        member['newest_url'] = newest_post.get_attribute("href")
+        member['newest_date'] = newest_post.find_element(By.CLASS_NAME, 'bl--card__date').text[:10]
+        member['exists_new_post'] = True
+    else:
+        member['exists_new_post'] = False
+
+    return member
 
 
-def save_images():
+def save_images(member):
     with open('newest.txt', 'r', encoding='utf-8') as f:
         txt = f.readlines()
         title = txt[0].rstrip('\n')
@@ -46,13 +45,13 @@ def save_images():
     options.add_argument('--no-sandbox')
     driver = webdriver.Chrome(options=options)
     driver.set_window_size('1200', '1000')
-    driver.get(url)
+    driver.get(member['newest_url'])
     time.sleep(5)
 
     content = driver.find_element(By.CLASS_NAME, 'bd--edit')
     images = content.find_elements(By.TAG_NAME, 'img')
 
-    path = title + '(' + date + ')'
+    path = 'images/' + member['name'] + '/' + member['newest_date'] + '(' + member['newest_title'] + ')'
     os.mkdir(path)
 
     for i, image in enumerate(images):

@@ -1,4 +1,5 @@
 import chromedriver_binary
+import csv
 import datetime
 from dotenv import load_dotenv
 import glob
@@ -14,7 +15,7 @@ import time
 import blog
 
 
-def login(TWITTER_BASE, LOGIN_ID, PASSWORD):
+def login(LOGIN_ID, PASSWORD):
     login_url = "https://twitter.com/login/check?lang=en"
     account = LOGIN_ID
     password = PASSWORD
@@ -38,16 +39,20 @@ def login(TWITTER_BASE, LOGIN_ID, PASSWORD):
     time.sleep(5)
 
 
-def tweet():
-    with open('newest.txt', 'r', encoding='utf-8') as f:
-        txt = f.readlines()
-        title = txt[0].rstrip('\n')
-        url = txt[1].rstrip('\n')
-        date = txt[2].rstrip('\n')
+def tweet(member):
+    title = member['newest_title']
+    print(title)
+    url = member['newest_url']
+    print(url)
+    date = member['newest_date']
+    print(date)
+    print( member['name'])
 
-    headline = title + '(' + date + ')'
+    text = title + '(' + date + ')'
     currentDir = os.getcwd()
-    files = glob.glob(os.path.join(currentDir + '/' + headline, '*'))
+    files = glob.glob(os.path.join(currentDir + '/' + 'images/' + member['name'] + '/' +
+                                   date + '(' + title + ')', '*'))
+    print(files)
 
     elm_create_tweet_btn = driver.find_element(By.XPATH, '//a[@data-testid="SideNav_NewTweet_Button"]')
     elm_create_tweet_btn.click()
@@ -57,7 +62,7 @@ def tweet():
         if i % 4 == 0:
             if i == 0:
                 text_area = driver.find_element(By.XPATH, r'//div[@data-testid="tweetTextarea_0"]')
-                text_area.send_keys(headline + '\n' + url + '\n1/' + str(len(files) // 4 + 1))
+                text_area.send_keys(text + '\n' + url + '\n1/' + str(len(files) // 4 + 1))
             else:
                 elem_add_btn = driver.find_element(By.XPATH, '//div[@data-testid="addButton"]')
                 elem_add_btn.click()
@@ -75,34 +80,63 @@ def tweet():
 
     time.sleep(10)
 
-    with open("log.txt", mode='a', encoding='utf-8') as f:
-        f.write("\n『" + title + "』" + "投稿完了 (" + str(datetime.datetime.now()) + ")")
-
-    driver.close()
-
 
 if __name__ == "__main__":
     load_dotenv()
-    TWITTER_BASE = os.getenv('TWITTER_BASE')
-    LOGIN_ID = os.getenv('LOGIN_ID')
-    PASSWORD = os.getenv('PASSWORD')
+    members = []
 
-    options = webdriver.ChromeOptions()
+    with open("config.csv", "r", encoding="utf-8_sig") as csvfile:
+        # CSVファイルを辞書型で読み込む
+        old_data = csv.DictReader(csvfile, delimiter=",", doublequote=True, lineterminator="\r\n", quotechar='"',
+                           skipinitialspace=True)
+        for member in old_data:
+            members.append(member)
 
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    driver = webdriver.Chrome(options=options)
-    driver.set_window_size('1200', '1000')
+    for i in range(len(members)):
+        print(members[i])
 
-    if blog.exists_new_post():
-        with open("newest.txt", mode='r', encoding='utf-8') as f:
-            txt = f.readlines()
-            title = txt[0].rstrip('\n')
+        options = webdriver.ChromeOptions()
 
-        blog.save_images()
+        options.add_argument('--headless')
+        options.add_argument('--no-sandbox')
+        driver = webdriver.Chrome(options=options)
+        driver.set_window_size('1200', '1000')
 
-        login(TWITTER_BASE, LOGIN_ID, PASSWORD)
-        tweet()
-    else:
-        with open("log.txt", mode='a', encoding='utf-8') as f:
-            f.write("\n更新なし (" + str(datetime.datetime.now()) + ")")
+        member = blog.reload_newest_post(members[i])
+        print(members[i])
+
+    field_name = members[0].keys()
+
+    with open(r'config.csv', 'w', encoding='utf-8') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=field_name)
+        writer.writeheader()
+        writer.writerows(members)
+
+    for member in members:
+        if member['exists_new_post']:
+            # blog.save_images(member)
+            options = webdriver.ChromeOptions()
+
+            # options.add_argument('--headless')
+            options.add_argument('--no-sandbox')
+            driver = webdriver.Chrome(options=options)
+            driver.set_window_size('1200', '1000')
+            login(member['id'], member['password'])
+            print(member)
+            tweet(member)
+
+            driver.close()
+
+            with open("log.txt", mode='a', encoding='utf-8') as f:
+                f.write(f"\n{member['name']}: 更新完了 (" + str(datetime.datetime.now()) + ")")
+        else:
+            with open("log.txt", mode='a', encoding='utf-8') as f:
+                f.write(f"\n{member['name']}: 更新なし (" + str(datetime.datetime.now()) + ")")
+
+# def test():
+#     currentDir = os.getcwd()
+#     files = glob.glob(os.path.join(currentDir + '/' + 'images/' + '一ノ瀬美空' + '/' +
+#                                    '2023.03.12' + '(' + 'ありがとうと！一ノ瀬美空' + ')', '*'))
+#     print(files)
+#
+# test()

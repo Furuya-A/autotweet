@@ -4,3 +4,4 @@ venv/
 .ssh/
 __pycache__/
 .idea/
+config.csv
